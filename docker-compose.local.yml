@@ -1,0 +1,20 @@
+# Local test on one machine, no HTTPS proxy: reachable ONLY at http://localhost:8080 (browsers treat localhost as a secure context).
+# Use:  docker compose -f docker-compose.local.yml up -d --build
+services:
+  vault:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"     # bound to this machine only, not the network
+    volumes:
+      - vault-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  vault-data:

@@ -34,6 +34,8 @@ docker compose logs vault | grep -A1 "Setup token"
 
 Open `https://your-domain`, enter the token, choose a master password. Do **not** publish port 8080 directly; only the proxy should reach the app.
 
+Just trying it on one machine? No domain needed: `docker compose -f docker-compose.local.yml up -d --build`, then open `http://localhost:8080` (bound to `127.0.0.1` only).
+
 Without Docker (e.g. in a Proxmox LXC): see the comments in [`deploy/rhodium-vault.service`](deploy/rhodium-vault.service).
 
 ## Configuration
