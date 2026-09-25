@@ -1,0 +1,31 @@
+﻿name: build-and-test
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  dotnet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet test tests/Server.Tests -c Release
+      - name: Fail on vulnerable dependencies
+        run: |
+          dotnet list src/Server package --vulnerable --include-transitive | tee vuln.txt
+          ! grep -q "has the following vulnerable packages" vuln.txt
+  web-crypto:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test "tests/web/*.test.mjs"
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t rhodium-vault-server .

@@ -1,0 +1,7 @@
+﻿bin/
+obj/
+data/
+publish/
+.vs/
+*.user
+node_modules/

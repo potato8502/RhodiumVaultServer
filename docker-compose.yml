@@ -1,0 +1,36 @@
+﻿# Rhodium Vault Server + Caddy (automatic HTTPS). Replace vault.example.com in deploy/Caddyfile first.
+services:
+  vault:
+    build: .
+    restart: unless-stopped
+    environment:
+      RVS_TRUSTPROXY: "true"      # we sit behind Caddy; do NOT publish port 8080 to the internet
+    volumes:
+      - vault-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - vault
+
+volumes:
+  vault-data:
+  caddy-data:
+  caddy-config:

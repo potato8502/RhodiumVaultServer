@@ -1,0 +1,11 @@
+{
+  "password": "correct horse battery staple",
+  "saltB64": "oKGio6SlpqeoqaqrrK2urw==",
+  "kdf": {
+    "memoryKiB": 65536,
+    "iterations": 3,
+    "parallelism": 4
+  },
+  "masterKeyHex": "a5c018c64ca4a709c5efa5b79d9a277befaee6d7fa15d98d82f337c8cfd20be1",
+  "authKeyB64": "xfN6cYEb3RHCE22m7+AIZB/3jBmc/iYdfD0sothmV/c="
+}

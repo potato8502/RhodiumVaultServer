@@ -1,0 +1,1 @@
+﻿{ "name": "rhodium-vault-server-web-tests", "private": true, "type": "module", "scripts": { "test": "node --test tests/web/*.test.mjs" } }

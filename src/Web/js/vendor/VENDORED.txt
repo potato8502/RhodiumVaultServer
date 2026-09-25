@@ -1,0 +1,4 @@
+﻿hash-wasm 4.12.0 (MIT) - argon2.umd.min.js
+Source: https://www.npmjs.com/package/hash-wasm (npm pack hash-wasm@4.12.0, file dist/argon2.umd.min.js)
+SHA-256: DCEC617A2E1B700FA132D1583A186CB70611113395E869F2DD6CC82B415D3094
+Vendored (not loaded from a CDN) so the app serves only same-origin scripts. Verify with: Get-FileHash argon2.umd.min.js -Algorithm SHA256

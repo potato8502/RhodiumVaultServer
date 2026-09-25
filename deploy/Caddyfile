@@ -1,0 +1,10 @@
+﻿# Public HTTPS with an automatic Let's Encrypt certificate.
+vault.example.com {
+    reverse_proxy vault:8080
+}
+
+# Home network only (no public domain)? Use Caddy's own CA instead and trust it in your browser:
+# vault.home.arpa {
+#     tls internal
+#     reverse_proxy vault:8080
+# }

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Rhodium Vault Server</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%232451d6'/%3E%3Cpath d='M12 4a4 4 0 0 0-4 4v2H7v9h10v-9h-1V8a4 4 0 0 0-4-4Zm-2 4a2 2 0 1 1 4 0v2h-4Z' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div id="fatal" class="center-screen" hidden>
+  <div class="card narrow">
+    <h1>Rhodium Vault</h1>
+    <p id="fatalText" class="danger"></p>
+  </div>
+</div>
+
+<!-- ===== Setup ===== -->
+<main id="viewSetup" class="center-screen" hidden>
+  <form id="setupForm" class="card narrow" autocomplete="off">
+    <h1>Rhodium Vault</h1>
+    <p class="muted">Welcome - let's set up your vault.</p>
+    <p class="warning">There is no recovery: if you forget your master password, your data cannot be restored. Not even by the server operator.</p>
+
+    <label for="setupToken">Setup token</label>
+    <input id="setupToken" type="text" spellcheck="false" autocomplete="off" required>
+    <p class="hint">Printed once in the server log at first start (<code>docker logs</code> or the service log).</p>
+
+    <label for="setupPw">Master password</label>
+    <input id="setupPw" type="password" autocomplete="new-password" required>
+    <p id="setupStrength" class="hint" hidden></p>
+
+    <label for="setupPw2">Confirm master password</label>
+    <input id="setupPw2" type="password" autocomplete="new-password" required>
+
+    <p id="setupError" class="danger" role="alert" hidden></p>
+    <button type="submit" class="btn primary block" id="setupBtn">Create vault</button>
+
+    <details class="restore">
+      <summary>Restore from a backup file instead</summary>
+      <p class="hint">Use a backup downloaded from another Rhodium Vault Server. The master password is the one that backup was created with.</p>
+      <input id="restoreFile" type="file" accept="application/json,.json">
+      <button type="button" class="btn ghost block" id="restoreBtn">Restore vault</button>
+    </details>
+  </form>
+</main>
+
+<!-- ===== Unlock ===== -->
+<main id="viewUnlock" class="center-screen" hidden>
+  <form id="unlockForm" class="card narrow">
+    <h1>Rhodium Vault</h1>
+    <p id="unlockNote" class="muted">Enter your master password to unlock.</p>
+    <label for="unlockPw">Master password</label>
+    <input id="unlockPw" type="password" autocomplete="current-password" required>
+    <p id="unlockError" class="danger" role="alert" hidden></p>
+    <button type="submit" class="btn primary block" id="unlockBtn">Unlock</button>
+  </form>
+</main>
+
+<!-- ===== Vault ===== -->
+<div id="viewVault" class="app" hidden>
+  <header class="topbar">
+    <h1>Rhodium Vault</h1>
+    <nav class="actions">
+      <button class="btn ghost" id="btnHistory" type="button">History</button>
+      <button class="btn ghost" id="btnBackup" type="button">Backup</button>
+      <button class="btn ghost" id="btnChangePw" type="button">Change password</button>
+      <button class="btn ghost" id="btnLock" type="button">Lock</button>
+    </nav>
+  </header>
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="Search entries..." aria-label="Search entries" autocomplete="off">
+    <button class="btn primary" id="btnAdd" type="button">+ Add entry</button>
+  </div>
+  <section id="entries" class="entries" aria-live="polite"></section>
+</div>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<!-- ===== Entry dialog ===== -->
+<dialog id="dlgEntry">
+  <form id="entryForm" method="dialog" autocomplete="off">
+    <h2 id="entryHeading">Add entry</h2>
+    <label for="eTitle">Title</label>
+    <input id="eTitle" type="text" required>
+    <label for="eUser">Username / Email</label>
+    <input id="eUser" type="text" autocomplete="off">
+    <label for="ePw">Password</label>
+    <div class="row">
+      <input id="ePw" type="password" autocomplete="new-password" spellcheck="false">
+      <button type="button" class="btn ghost" id="eReveal">Show</button>
+      <button type="button" class="btn ghost" id="eGenerate">Generate</button>
+    </div>
+    <div class="gen">
+      <label for="genLen">Generator length: <span id="genLenVal">20</span></label>
+      <input id="genLen" type="range" min="8" max="48" value="20">
+      <div class="checks">
+        <label><input type="checkbox" id="genUpper" checked> A-Z</label>
+        <label><input type="checkbox" id="genLower" checked> a-z</label>
+        <label><input type="checkbox" id="genDigits" checked> 0-9</label>
+        <label><input type="checkbox" id="genSymbols" checked> !@#</label>
+      </div>
+    </div>
+    <label for="eUrl">URL (optional)</label>
+    <input id="eUrl" type="text" autocomplete="off">
+    <label for="eNotes">Notes (optional)</label>
+    <textarea id="eNotes" rows="3"></textarea>
+    <p id="entryError" class="danger" role="alert" hidden></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" id="entryCancel">Cancel</button>
+      <button type="submit" class="btn primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ===== Change password dialog ===== -->
+<dialog id="dlgChange">
+  <form id="changeForm" method="dialog" autocomplete="off">
+    <h2>Change master password</h2>
+    <p class="muted">This re-encrypts your entire vault under the new password and signs out all other sessions.</p>
+    <label for="cCur">Current master password</label>
+    <input id="cCur" type="password" autocomplete="current-password" required>
+    <label for="cNew">New master password</label>
+    <input id="cNew" type="password" autocomplete="new-password" required>
+    <p id="cStrength" class="hint" hidden></p>
+    <label for="cNew2">Confirm new master password</label>
+    <input id="cNew2" type="password" autocomplete="new-password" required>
+    <p class="warning">There is no recovery: if you forget your new master password, your data cannot be restored.</p>
+    <p id="changeError" class="danger" role="alert" hidden></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" id="changeCancel">Cancel</button>
+      <button type="submit" class="btn primary" id="changeBtn">Change password</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ===== History dialog ===== -->
+<dialog id="dlgHistory">
+  <h2>Previous versions</h2>
+  <p class="muted">The server keeps the last saved versions (encrypted). Restoring one saves it as a new version - nothing is lost.</p>
+  <ul id="historyList" class="history"></ul>
+  <div class="dialog-actions"><button type="button" class="btn ghost" id="historyClose">Close</button></div>
+</dialog>
+
+<script src="js/vendor/argon2.umd.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

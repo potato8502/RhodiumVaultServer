@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>RhodiumVaultServer</AssemblyName>
+    <RootNamespace>RhodiumVaultServer</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The static web UI lives in src/Web and is served from wwwroot next to the binary. -->
+    <None Include="..\Web\**\*" Exclude="..\Web\**\package.json" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

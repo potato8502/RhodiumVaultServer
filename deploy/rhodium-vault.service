@@ -1,0 +1,30 @@
+﻿# systemd unit for running without Docker (e.g. in a Proxmox LXC).
+# 1) dotnet publish src/Server -c Release -r linux-x64 --self-contained true -o /opt/rhodium-vault
+# 2) useradd --system --home /var/lib/rhodium-vault --shell /usr/sbin/nologin rhodiumvault
+# 3) mkdir -p /var/lib/rhodium-vault && chown rhodiumvault: /var/lib/rhodium-vault
+# 4) copy this file to /etc/systemd/system/rhodium-vault.service, then: systemctl enable --now rhodium-vault
+#    The setup token is printed to the journal:  journalctl -u rhodium-vault | grep -A1 "Setup token"
+[Unit]
+Description=Rhodium Vault Server
+After=network.target
+
+[Service]
+User=rhodiumvault
+ExecStart=/opt/rhodium-vault/RhodiumVaultServer
+WorkingDirectory=/opt/rhodium-vault
+Environment=RVS_DATADIR=/var/lib/rhodium-vault
+Environment=ASPNETCORE_URLS=http://127.0.0.1:8080
+Environment=RVS_TRUSTPROXY=true
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ReadWritePaths=/var/lib/rhodium-vault
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service
+
+[Install]
+WantedBy=multi-user.target
