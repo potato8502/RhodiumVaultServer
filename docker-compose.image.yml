@@ -1,0 +1,21 @@
+# Run the published image (no build, no source needed) on http://localhost:8080 only.
+# Use:  docker compose -f docker-compose.image.yml up -d
+# For a real domain with HTTPS put a reverse proxy in front, see docker-compose.yml and deploy/Caddyfile.
+services:
+  vault:
+    image: ghcr.io/potato8502/rhodiumvaultserver:0.1.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - vault-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  vault-data:

@@ -1,5 +1,6 @@
 ﻿# Build
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# The publish output is framework-dependent and architecture-neutral, so it is built once on the build machine
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY src/ src/
 RUN dotnet publish src/Server -c Release -o /app --no-self-contained

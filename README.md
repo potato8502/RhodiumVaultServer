@@ -70,4 +70,6 @@ The web UI is plain JavaScript with no build step; the only third-party code is 
 
 ## License
 
-Not decided yet - until a `LICENSE` file is added, all rights are reserved.
+Copyright (C) 2026 Rhodium Software. Licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). You may use, study, change and share it freely; if you run a modified version as a network service, you must offer its source code to the users of that service.
+
+The vendored Argon2 build in `src/Web/js/vendor` is MIT licensed by its authors (see `hash-wasm.LICENSE.txt`).
